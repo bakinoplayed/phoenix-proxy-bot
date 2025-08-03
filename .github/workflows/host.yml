@@ -1,9 +1,9 @@
 name: Host Phoenix Proxy Bot 24/7
 
 on:
-  workflow_dispatch:  # Allow manual triggers
+  workflow_dispatch:
   schedule:
-    - cron: '*/5 * * * *'  # Restart every 5 minutes to prevent timeouts
+    - cron: '*/5 * * * *'
 
 jobs:
   host-bot:
@@ -24,8 +24,16 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         run: |
-          # Keep the bot running with auto-restart
-          while true; do
-            python bot.py || echo "Bot crashed with exit code $?. Restarting..." >&2
-            sleep 1
-          done
+          # Verify file exists first
+          ls -la
+          echo "Checking bot.py exists..."
+          if [ -f "bot.py" ]; then
+            echo "Starting bot..."
+            while true; do
+              python bot.py || echo "Bot crashed with exit code $?. Restarting..." >&2
+              sleep 1
+            done
+          else
+            echo "ERROR: bot.py not found!"
+            exit 1
+          fi
